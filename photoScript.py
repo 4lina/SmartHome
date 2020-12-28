@@ -27,11 +27,19 @@ while True:
     inputCamera = gpio.input(18)
 
     if inputCamera == False:
-        print('Camera Button Pressed')
+        print('Door bell was pressed')
+        # Publish DoorBellRing
+        client.publish("DoorBell", "ding dong")
+        
         # If The Camera Button is Pressed Take a Photo and Save With Current Date and Time
-        subprocess.run(["raspistill", "-t"," 1000", "-o", "/home/pi/Documents/PiProjects/SmartHome/Photos/" +  datetime.datetime.now().strftime('%Y-%m-%d%H:%M:%S') + ".png"])
+        photoName = "/home/pi/Documents/PiProjects/SmartHome/Photos/" +  datetime.datetime.now().strftime('%Y-%m-%d%H:%M:%S') + ".jpg"
+        subprocess.run(["raspistill", "-t"," 1000", "-o", photoName])
+        
+        # Read picture and convert it to byte array
+        p = open(photoName, "rb")
+        pictureContent = p.read()
+        byteArray = bytearray(pictureContent)
+        
         # Publish picture
-        client.publish("DoorBell", "Hi Niki")
-
-
-
+        client.publish("DoorBell", byteArray)
+        print("published picture")
